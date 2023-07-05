@@ -30,20 +30,27 @@ class Core {
 	/**
 	 * Test Security Settings.
 	 * Command: wp um security test user=<user_id>
+	 *
+	 * @param array $args Command arguments.
+	 * @param array $assoc_args Associated arguments.
 	 */
 	public function test_security_settings( $args, $assoc_args ) {
-		$args = wp_parse_args( $args[0], array(
-			'user' => null,
-		) );
-		\WP_CLI::success( esc_html__( 'Account with user ID ' . $args['user'] . ' has been validated. ', 'ultimate-member' ) );
-		
+		$args = wp_parse_args(
+			$args[0],
+			array(
+				'user' => null,
+			)
+		);
+
+		\WP_CLI::success( sprintf( /* translators: Account with user ID %s has been validated */ __( 'Account with user ID %s has been validated. ', 'ultimate-member' ), $args['user'] ) );
+
 		add_filter( 'um_secure_blocked_user_redirect_immediately', '__return_false' );
 
 		$is_secured = UM()->secure()->secure_user_capabilities( $args['user'] );
 		if ( $is_secured ) {
-			\WP_CLI::success( \WP_CLI::colorize( esc_html__( 'Account with user ID ' . $args['user'] . ' has been %Gsecured and %Rflagged as suspicious account. ', 'ultimate-member' ) ) );
+			\WP_CLI::success( sprintf( /* translators: Account with user ID %s has been validated */ \WP_CLI::colorize( 'Account with user ID %s has been %Gsecured and %Rflagged as suspicious account.' ), $args['user'] ) );
 		} else {
-			\WP_CLI::success( \WP_CLI::colorize( esc_html__( 'Account with user ID ' . $args['user'] . ' is %Yalready %Ysecured. ', 'ultimate-member' ) ) );
+			\WP_CLI::success( sprintf( /* translators: Account with user ID %s has been validated */ \WP_CLI::colorize( 'Account with user ID %s is %Yalready %Ysecured. ' ), $args['user'] ) );
 		}
 
 	}
@@ -61,17 +68,17 @@ class Core {
 			$arr_banned_caps = UM()->secure()->banned_admin_capabilities;
 		}
 
-		foreach( $arr_banned_caps as $k => $cap ) {
-			$args = array (
-				'capability' => $cap,
+		foreach ( $arr_banned_caps as $k => $cap ) {
+			$args          = array(
+				'capability'   => $cap,
 				'role__not_in' => array( 'administrator' ),
 			);
 			$wp_user_query = new \WP_User_Query( $args );
-			$count_users = $wp_user_query->get_total();
+			$count_users   = $wp_user_query->get_total();
 			if ( $count_users <= 0 ) {
-				\WP_CLI::success( \WP_CLI::colorize( esc_html__( '`' . $cap . '` is %Gsafe', 'ultimate-member' ) ) );
-		    } else {
-				\WP_CLI::success( \WP_CLI::colorize( esc_html__( '`%Y' . $cap . '`%N', 'ultimate-member' ) ) . ' has ' . \WP_CLI::colorize( esc_html__('%Raffected `' . $count_users . '`%N user accounts. ', 'ultimate-member' ) ) );
+				\WP_CLI::success( \WP_CLI::colorize( '`' . $cap . '` is %Gsafe', 'ultimate-member' ) );
+			} else {
+				\WP_CLI::success( \WP_CLI::colorize( '`%Y' . $cap . '`%N' ) . ' has ' . \WP_CLI::colorize( '%Raffected `' . $count_users . '`%N user accounts. ' ) );
 			}
 		}
 	}
@@ -79,17 +86,23 @@ class Core {
 	/**
 	 * Total Flagged accounts
 	 * Command: wp um security flagged users interval=<today|last_hour>
+	 *
+	 * @param array $args Command arguments.
+	 * @param array $assoc_args Associated arguments.
 	 */
 	public function test_security_settings_total_flagged_accounts( $args, $assoc_args ) {
-		$args = wp_parse_args( isset( $args[0] ) ? $args[0]: '', array(
-			'interval' => '',
-		) );
+		$args = wp_parse_args(
+			isset( $args[0] ) ? $args[0] : '',
+			array(
+				'interval' => '',
+			),
+		);
 
 		if ( 'today' === $args['interval'] ) {
 			$query_args = array(
 				'fields'     => 'ID',
 				'relation'   => 'AND',
-				'meta_query' => array(
+				'meta_query' => array( //phpcs:ignore slow query ok.
 					'relation' => 'AND',
 					array(
 						'key'     => 'um_user_blocked__datetime',
@@ -105,14 +118,15 @@ class Core {
 					),
 				),
 			);
+
 			$users = new \WP_User_Query( $query_args );
 
-			\WP_CLI::success( \WP_CLI::colorize( sprintf( _n( 'There\s %d account that has been blocked today.', 'There are %d accounts that have been blocked today.', $users->get_total(), 'ultimate-member' ), $users->get_total() ) ) );
-			
-		} else if( 'last_hour' == $args['interval'] ) {
+			\WP_CLI::success( \WP_CLI::colorize( /* translators: */ sprintf( _n( 'There\s %d account that has been blocked today.', 'There are %d accounts that have been blocked today.', $users->get_total(), 'ultimate-member' ), $users->get_total() ) ) );
+
+		} elseif ( 'last_hour' === $args['interval'] ) {
 			$query_args = array(
 				'fields'     => 'ID',
-				'meta_query' => array(
+				'meta_query' => array( //phpcs:ignore slow query ok.
 					'relation' => 'AND',
 					array(
 						'key'     => 'um_user_blocked__datetime',
@@ -125,26 +139,24 @@ class Core {
 
 			$users = new \WP_User_Query( $query_args );
 
-			\WP_CLI::success( \WP_CLI::colorize( sprintf( _n( 'There\s %d account that has been blocked within the last hour.', 'There are %d accounts that have been blocked within the last hour.', $users->get_total(), 'ultimate-member' ), $users->get_total() ) ) );
-			
-		} else if ( empty( $args['interval'] ) ) {
+			\WP_CLI::success( \WP_CLI::colorize( /* translators: */ sprintf( _n( 'There\s %d account that has been blocked within the last hour.', 'There are %d accounts that have been blocked within the last hour.', $users->get_total(), 'ultimate-member' ), $users->get_total() ) ) );
+
+		} elseif ( empty( $args['interval'] ) ) {
 			$query_args = array(
 				'fields'     => 'ID',
 				'relation'   => 'AND',
-				'meta_query' => array(
+				'meta_query' => array(  //phpcs:ignore slow query ok.
 					'relation' => 'AND',
 					array(
 						'key'     => 'um_user_blocked__datetime',
 						'compare' => 'EXISTS',
 					),
-					
 				),
 			);
-			$users = new \WP_User_Query( $query_args );
-			\WP_CLI::success( \WP_CLI::colorize( sprintf( _n( 'There\s %d account that has been blocked on your site.', 'There are %d accounts that have been blocked on your site.', $users->get_total(), 'ultimate-member' ), $users->get_total() ) ) );
-		
-		}
 
-		
+			$users = new \WP_User_Query( $query_args );
+			\WP_CLI::success( \WP_CLI::colorize( /* translators: */ sprintf( _n( 'There\s %d account that has been blocked on your site.', 'There are %d accounts that have been blocked on your site.', $users->get_total(), 'ultimate-member' ), $users->get_total() ) ) );
+
+		}
 	}
 }
