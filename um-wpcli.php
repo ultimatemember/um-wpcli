@@ -11,6 +11,8 @@
  * @package Champ
  */
 
+define( 'UM_WPCLI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die( 'You are not allowed to call this page directly.' );
 }

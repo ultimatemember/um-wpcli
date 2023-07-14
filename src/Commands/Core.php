@@ -35,6 +35,10 @@ class Core {
 	 * @param array $assoc_args Associated arguments.
 	 */
 	public function test_security_settings( $args, $assoc_args ) {
+		if ( ! isset( $args[0] ) ) {
+			\WP_CLI::error( /* translators: User Id is required. e.g user=123 */ __( 'User ID is required. e.g. `wp um security test user=<user_id>`', 'ultimate-member' ) );
+			return;
+		}
 		$args = wp_parse_args(
 			$args[0],
 			array(
@@ -46,7 +50,7 @@ class Core {
 
 		add_filter( 'um_secure_blocked_user_redirect_immediately', '__return_false' );
 
-		$is_secured = UM()->secure()->secure_user_capabilities( $args['user'] );
+		$is_secured = UM()->frontend()->secure()->secure_user_capabilities( $args['user'] );
 		if ( $is_secured ) {
 			\WP_CLI::success( sprintf( /* translators: Account with user ID %s has been validated */ \WP_CLI::colorize( 'Account with user ID %s has been %Gsecured and %Rflagged as suspicious account.' ), $args['user'] ) );
 		} else {

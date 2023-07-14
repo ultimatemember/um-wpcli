@@ -26,5 +26,7 @@ class Core {
 		new Commands\Core();
 		// Stripe.
 		new Commands\Stripe();
+		// Developer.
+		new Commands\Developer();
 	}
 }

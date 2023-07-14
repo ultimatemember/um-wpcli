@@ -1,0 +1,22 @@
+<?php
+/**
+ * Core class
+ *
+ * @package {namespace}
+ */
+
+namespace {namespace};
+
+/**
+ * Class Core to handle all plugin initialization.
+ *
+ * @since 1.0.0
+ */
+class Core {
+	/**
+	 * Init
+	 */
+	public function __construct() {
+		// Do something.
+	}
+}
