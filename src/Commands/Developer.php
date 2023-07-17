@@ -43,6 +43,11 @@ class Developer {
 			return;
 		}
 		$namespace = $args[0];
+
+		if ( false === strpos( $namespace, 'UM_Extended_' ) ) {
+			$namespace = 'UM_Extended_' . str_replace( '-', '_', ucwords( $namespace ) );
+		}
+
 		if ( class_exists( $namespace . '\Core' ) ) {
 			\WP_CLI::error( /* translators: Namespace is already in use */ __( 'Namespace is already in use', 'ultimate-member' ) );
 			return;
@@ -54,7 +59,6 @@ class Developer {
 		} else {
 			$directory = 'src/um-' . $dir;
 		}
-
 		$directory = str_replace( 'um-extended', 'um', $directory );
 
 		mkdir( UM_EXTENDED_PLUGIN_DIR . $directory );
