@@ -110,12 +110,12 @@ class Developer {
 		}
 
 		// Make directories.
-		wp_mkdir_p( $plugin_root_dir . '/frontend/assets/js' );
-		wp_mkdir_p( $plugin_root_dir . '/frontend/assets/css' );
-		wp_mkdir_p( $plugin_root_dir . '/frontend/assets/images/' );
-		wp_mkdir_p( $plugin_root_dir . '/admin/assets/js' );
-		wp_mkdir_p( $plugin_root_dir . '/admin/assets/css' );
-		wp_mkdir_p( $plugin_root_dir . '/admin/images/' );
+		wp_mkdir_p( $plugin_root_dir . '/assets/admin/js' );
+		wp_mkdir_p( $plugin_root_dir . '/assets/admin/css' );
+		wp_mkdir_p( $plugin_root_dir . '/assets/admin/images/' );
+		wp_mkdir_p( $plugin_root_dir . '/assets/frontend/js' );
+		wp_mkdir_p( $plugin_root_dir . '/assets/frontend/css' );
+		wp_mkdir_p( $plugin_root_dir . '/assets/frontend/images/' );
 
 		$plugin_dir          = str_replace( 'um-', '', basename( $root_plugin_dir ) );
 		$plugin_slug         = str_replace( '-', '_', basename( $plugin_dir ) );
