@@ -7,6 +7,8 @@
 
 namespace {namespace};
 
+use {namespace}\Enqueue;
+
 /**
  * Class Core to handle all plugin initialization.
  *
@@ -17,6 +19,20 @@ class Core {
 	 * Init
 	 */
 	public function __construct() {
-		// Do something.
+
+		// Register JS & Styles.
+		new Enqueue();
+	}
+
+	/**
+	 * Get Plugin URL
+	 */
+	public function plugin_url() {
+
+		if ( defined( 'UM_EXTENDED_PLUGIN_URL' ) && \UM_EXTENDED_PLUGIN_URL ) {
+			return \UM_EXTENDED_PLUGIN_URL . '/src/um-{plugin_dir}/';
+		}
+
+		return {plugin_constant_url};
 	}
 }

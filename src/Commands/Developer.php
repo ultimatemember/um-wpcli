@@ -61,9 +61,11 @@ class Developer {
 		$core_dir = UM_EXTENDED_PLUGIN_DIR . $directory . '/src';
 		mkdir( $core_dir );
 
+		$plugin_root_dir = UM_EXTENDED_PLUGIN_DIR . $directory;
+
 		// Update root composer.json file.
 		$this->handle( $namespace, $directory );
-		$this->create_core_file( $namespace, $core_dir );
+		$this->create_core_files( $namespace, $core_dir, $directory, $plugin_root_dir );
 		\WP_CLI::success( /* translators: Created new project succesfully  */ sprintf( __( 'Created new project succesfully. Please run `composer update` in `%s`', 'ultimate-member' ), UM_EXTENDED_PLUGIN_DIR ) );
 	}
 
@@ -95,8 +97,10 @@ class Developer {
 	 *
 	 * @param string $namespace Namespace.
 	 * @param string $directory Directory path.
+	 * @param string $root_plugin_dir Root Plugin directory.
+	 * @param string $plugin_root_dir Plugin roo directory without path.
 	 */
-	public function create_core_file( $namespace, $directory ) {
+	public function create_core_files( $namespace, $directory, $root_plugin_dir, $plugin_root_dir ) {
 
 		global $wp_filesystem;
 		// Initialize the WP filesystem, no more using 'file-put-contents' function.
@@ -105,10 +109,55 @@ class Developer {
 			WP_Filesystem();
 		}
 
+		// Make directories.
+		wp_mkdir_p( $plugin_root_dir . '/frontend/assets/js' );
+		wp_mkdir_p( $plugin_root_dir . '/frontend/assets/css' );
+		wp_mkdir_p( $plugin_root_dir . '/frontend/assets/images/' );
+		wp_mkdir_p( $plugin_root_dir . '/admin/assets/js' );
+		wp_mkdir_p( $plugin_root_dir . '/admin/assets/css' );
+		wp_mkdir_p( $plugin_root_dir . '/admin/images/' );
+
+		$plugin_dir          = str_replace( 'um-', '', basename( $root_plugin_dir ) );
+		$plugin_slug         = str_replace( '-', '_', basename( $plugin_dir ) );
+		$plugin_dir_slug     = str_replace( '-', '_', basename( $plugin_dir ) );
+		$plugin_name         = str_replace( '_', ' ', ucwords( basename( $plugin_dir ) ) );
+		$plugin_url_constant = 'UM_EXTENDED_' . strtoupper( $plugin_dir_slug ) . '_PLUGIN_URL';
+		$namespace_root      = strtoupper( $plugin_dir_slug );
+
+		// Create Core class and file.
 		$tmpl    = $wp_filesystem->get_contents( UM_WPCLI_PLUGIN_DIR . 'Templates/Developer/Core.txt' );
 		$content = str_replace( '{namespace}', $namespace, $tmpl );
+		$content = str_replace( '{plugin_constant_url}', $plugin_url_constant, $content );
+		$content = str_replace( '{plugin_dir}', $plugin_dir, $content );
 		if ( ! $wp_filesystem->put_contents( $directory . '/Core.php', $content, 0644 ) ) {
 			return wp_die( esc_attr( 'Failed to create core files for namespace ' . $namespace ) );
+		}
+		// Create root plugin file.
+		$tmpl    = $wp_filesystem->get_contents( UM_WPCLI_PLUGIN_DIR . 'Templates/Developer/plugin.txt' );
+		$content = str_replace( '{namespace}', $namespace, $tmpl );
+		$content = str_replace( '{plugin_namespace_root}', $namespace_root, $content );
+		$content = str_replace( '{plugin_dir}', $plugin_dir, $content );
+		$content = str_replace( '{plugin_dir_root}', $root_plugin_dir, $content );
+		$content = str_replace( '{plugin_slug}', $plugin_slug, $content );
+		$content = str_replace( '{plugin_name}', $plugin_name, $content );
+		if ( ! $wp_filesystem->put_contents( $plugin_root_dir . '/' . basename( $root_plugin_dir ) . '.php', $content, 0644 ) ) {
+			return wp_die( esc_attr( 'Failed to create plugin file: ' . $plugin_root_dir . '/' . basename( $root_plugin_dir ) . '.php' ) );
+		}
+
+		// Create Enqueue class and file.
+		$tmpl    = $wp_filesystem->get_contents( UM_WPCLI_PLUGIN_DIR . 'Templates/Developer/Enqueue.txt' );
+		$content = str_replace( '{namespace}', $namespace, $tmpl );
+		$content = str_replace( '{plugin_dir}', $plugin_dir, $content );
+		if ( ! $wp_filesystem->put_contents( $directory . '/Enqueue.php', $content, 0644 ) ) {
+			return wp_die( esc_attr( 'Failed to create Enqueue file for namespace ' . $namespace ) );
+		}
+
+		// Create composer.json file.
+		$tmpl    = $wp_filesystem->get_contents( UM_WPCLI_PLUGIN_DIR . 'Templates/Developer/composer.txt' );
+		$content = str_replace( '{plugin_namespace}', $namespace, $tmpl );
+		$content = str_replace( '{plugin_dir}', $plugin_dir, $content );
+		if ( ! $wp_filesystem->put_contents( UM_EXTENDED_PLUGIN_DIR . $root_plugin_dir . '/composer.json', $content, 0644 ) ) {
+			return wp_die( esc_attr( 'Failed to create composer.json file: ' . UM_EXTENDED_PLUGIN_DIR . $root_plugin_dir . '/composer.json' ) );
 		}
 	}
 }
