@@ -7,6 +7,7 @@
  * Author: Ultimate Member
  * Author URI: https://www.ultimatemember.com
  * Text Domain: um-wpcli
+ * UM version: 2.6.12
  *
  * @package Champ
  */

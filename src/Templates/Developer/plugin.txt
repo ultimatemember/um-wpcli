@@ -6,9 +6,9 @@
  * Version: 1.0.0
  * Author: Ultimate Member
  * Author URI: https://www.ultimatemember.com
- * Text Domain: {plugin_dir_root}
+ * Text Domain: um-extended-{plugin_dir}
  *
- * @package {plugin_name}
+ * @package UM_Extended_{plugin_name}
  */
 
 define( 'UM_EXTENDED_{plugin_namespace_root}_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
